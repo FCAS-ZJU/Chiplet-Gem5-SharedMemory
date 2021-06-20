@@ -1,0 +1,27 @@
+digraph G {
+ranksep="1.3";
+subgraph cluster_root {
+color="#000000";
+fillcolor="#bab6ae";
+fontcolor="#000000";
+fontname=Arial;
+fontsize=14;
+label="root \n: Root";
+shape=Mrecord;
+style="rounded, filled";
+tooltip="eventq_index&#61;0&#10;\full_system&#61;false&#10;\sim_quantum&#61;0&#10;\time_sync_enable&#61;false&#10;\time_sync_period&#61;100000000000&#10;\time_sync_spin_threshold&#61;100000000";
+subgraph cluster_hello {
+color="#000000";
+fillcolor="#9f9c95";
+fontcolor="#000000";
+fontname=Arial;
+fontsize=14;
+label="hello \n: HelloObject";
+shape=Mrecord;
+style="rounded, filled";
+tooltip="eventq_index&#61;0";
+}
+
+}
+
+}

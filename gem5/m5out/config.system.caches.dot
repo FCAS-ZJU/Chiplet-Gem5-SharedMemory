@@ -1,0 +1,16 @@
+graph G {
+rankdir=LR;
+"system.caches.network.routers0" [color="#000000", fillcolor="#cce6fc", fontcolor="#000000", fontname=Arial, fontsize=14, label="R 0", shape=Mrecord, style="rounded, filled"];
+"system.caches.network.routers1" [color="#000000", fillcolor="#cce6fc", fontcolor="#000000", fontname=Arial, fontsize=14, label="R 1", shape=Mrecord, style="rounded, filled"];
+"system.caches.network.routers2" [color="#000000", fillcolor="#cce6fc", fontcolor="#000000", fontname=Arial, fontsize=14, label="R 2", shape=Mrecord, style="rounded, filled"];
+"system.caches.network.routers0" -- "system.caches.network.routers1";
+"system.caches.network.routers0" -- "system.caches.network.routers2";
+"system.caches.network.routers1" -- "system.caches.network.routers2";
+"system.caches.network.routers2" -- "system.caches.network.routers0";
+"system.caches.controllers0" [color="#000000", fillcolor="#e5bcd0", fontcolor="#000000", fontname=Arial, fontsize=14, label=controllers0, shape=Mrecord, style="rounded, filled"];
+"system.caches.controllers0" -- "system.caches.network.routers0";
+"system.caches.controllers1" [color="#000000", fillcolor="#e5bcd0", fontcolor="#000000", fontname=Arial, fontsize=14, label=controllers1, shape=Mrecord, style="rounded, filled"];
+"system.caches.controllers1" -- "system.caches.network.routers1";
+"system.caches.controllers2" [color="#000000", fillcolor="#e5bcd0", fontcolor="#000000", fontname=Arial, fontsize=14, label=controllers2, shape=Mrecord, style="rounded, filled"];
+"system.caches.controllers2" -- "system.caches.network.routers2";
+}

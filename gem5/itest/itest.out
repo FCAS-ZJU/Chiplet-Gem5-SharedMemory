@@ -1,0 +1,3 @@
+      0: system.pc.south_bridge.cmos.rtc: Real-time clock set to Sun Jan  1 00:00:00 2012
+105506071000: system.pc.com_1.device: attach terminal 0
+335307615037500: system.pc.com_1.device: detach terminal 0
