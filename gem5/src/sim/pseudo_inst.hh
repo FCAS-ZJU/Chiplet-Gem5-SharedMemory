@@ -95,7 +95,7 @@ decodeAddrOffset(Addr offset, uint8_t &func)
 
 
 void gadia_call(ThreadContext *tc, uint64_t a, uint64_t b, uint64_t c, uint64_t d);
-uint64_t gadia_receive(ThreadContext* tc, uint64_t srcCore);
+uint64_t gadia_receive(ThreadContext* tc, uint64_t a);
 void arm(ThreadContext *tc);
 void quiesce(ThreadContext *tc);
 void quiesceSkip(ThreadContext *tc);

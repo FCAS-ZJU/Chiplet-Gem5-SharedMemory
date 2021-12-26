@@ -110,218 +110,84 @@ panicFsOnlyPseudoInst(const char *name)
 }
 
 
-void gadia_call(ThreadContext *tc, uint64_t srcCoreNum, uint64_t toStart, uint64_t data, uint64_t isCompleted){
-		// now we modify the program to change the behaviour so that it can send the message to the router
-		// argument as follows
-		// we now assume that the srcCore, desCore, whether to complete the task(boolean)
-		// the output is assume to be src, destination, data
-	uint64_t data_clear = isCompleted;	
+void gadia_call(ThreadContext *tc, uint64_t srcCore, uint64_t targetCoreNum, uint64_t data, uint64_t init){
+    
+    std::string fileName = "communication";
+    int srcCoreNum = int(srcCore);
+    fileName += ((int)targetCoreNum) + '0';
 
-	if(data_clear == 2){
+    std::cout << (int)srcCoreNum << " " << (int)targetCoreNum << " " << (int)data << " in " << fileName << endl;
 
-		//my lucky number!
-    		int fd = 32256;
-        	struct flock lock = {};
-        	lock.l_type = F_WRLCK;
-        	lock.l_whence = SEEK_SET;
-        	lock.l_start = 0;
-        	lock.l_len = 0;
-        	lock.l_pid = getpid();
-		fcntl(fd, F_SETLKW, &lock);
+    ofstream outfile;
+    if(init == 0){
+	//fileName += targetCoreNum + '0';
+        outfile.open(fileName, std::ios::app);
+        outfile << (unsigned long long)curTick() <<" " << (int)srcCoreNum << " " << (int)targetCoreNum << " " << (int)data << endl;
+    }else{
+	fileName += srcCoreNum + '0';
+        //outfile.open(fileName, std::ios::out);
 
+    }
+    outfile.close();
 
-
-          	ofstream outfile;
-          	outfile.open("semaphore", std::ios::app);
-          	outfile << 1 << endl;
-          	outfile.close();
-
-
-		lock.l_type = F_UNLCK;
-                fcntl(fd, F_SETLKW, &lock);
-
-	  	return;
-
-	}
-
-
-    if(isCompleted == 1){
-   
-	// modify the file to declare the completeness
-	//string name;
-	//name	+= (unsigned int)srcCoreNum;
-	ofstream outfile;
-        outfile.open("semaphore", std::ios::app);
-        outfile << 0 << endl;
-        outfile.close();
-		return;
-   } 
-		
-
-	  ofstream outfile;
-          outfile.open("data", std::ios::app);
-          outfile << data << endl;
-          outfile.close();
 
 }
+static long long gadia_last_position = 0;
+uint64_t gadia_receive(ThreadContext* tc, uint64_t srcCoreNumber){
+      // srcCore,TargetCore(-1 means all),data(int)
+
+    std::string fileName = "communication";
 
 
-static int gadia_counter = 0;
-static bool isEOF = false;
-uint64_t gadia_receive(ThreadContext* tc, uint64_t srcCore){
+    int srcCore = (int)srcCoreNumber;
 
-    // first we check whether the caculation completed
 
-	/*
-    ifstream infile;
-    infile.open("cmplt", std::ios::in);
-    int b;
-    infile >> b;
-    if(b == 1){
-        // it shows caculation completed
-	// then we return -3
-	infile.close();
+    fileName += ((int)srcCoreNumber) + '0';
+
+  
+    std::ifstream file;
+    file.open(fileName, std::ios::in);
+
+    std::stringstream ss;
+    std::string line = "";
+    //std::cout << fileName << "  ";
+
+    if (!file.is_open()) {
+	//std::cout << "invalid file with Core number" << srcCore <<" its real name is " <<  fileName;
+	std::cout << srcCore <<  "  " << fileName << std::endl;
 	return (uint64_t)-3;
-
     }
 
-    infile.close();
-*/
-   /*
-    std::string basicName = "semaphore";
-    basicName += srcCore + '0';
-    const int length = basicName.length();
-    char a[length];
+    file.seekg(gadia_last_position);
 
-    for(int i = 0; i < length;i++){
+    while(std::getline(file, line)){
+	ss.clear();
+	ss.str(line);
 
-	a[i] = basicName[i];
-    }*/    
-   
-    int fd;
+	int a;
+	int b;
+	int c;
+	unsigned long long time;
+	ss >> time;
+	ss >> a;
+	ss >> b;
+	ss >> c;
 
-    if(srcCore != -1){
-	fd = open("semaphore", O_RDONLY);
-	struct flock lock = {};
-    	lock.l_type = F_WRLCK;
-    	lock.l_whence = SEEK_SET;
-    	lock.l_start = 0;
-    	lock.l_len = 0;
+        std::cout << time << "    " << a << "    " << b << "    " << c << std::endl;
 
-    	lock.l_pid = getpid();
-
-    	char buffer[256] = {'5', '6'};
-
-    	fcntl(fd, F_SETLKW, &lock);
-
-    	//size_t len = 0;
-    	ssize_t size = read(fd, buffer, 256);
-
-
-    	// the size is 2* totalChiplet + 2
-    	if(size == (2 * srcCore + 2) || (size == 2*(2*srcCore) + 2)){
-       		 // the data is clear
-       	 	close(fd);
-       	 	lock.l_type = F_UNLCK;
-       	 	fcntl(fd, F_SETLKW, &lock);
-       	 	return (uint64_t) -4;
-
-
-    	 }else{
-
-            std::cout<< "needed is " << 2*srcCore + 2 << " or " << 4*srcCore + 2 << " but " << size << std::endl;
-    	 }	
-
-
-	close(fd);
-        lock.l_type = F_UNLCK;
-        fcntl(fd, F_SETLKW, &lock);
-
-	// the barrier is waitting
-	
-	return (uint64_t)-6;
-
-    }else{
-	//fd = open("semaphore", O_RDONLY);
-
-    }
-
-    //int fd = open(a, O_RDWR);
-   
-
-    /*
-    struct flock lock = {};
-    lock.l_type = F_WRLCK;
-    lock.l_whence = SEEK_SET;
-    lock.l_start = 0;
-    lock.l_len = 0;
-
-    lock.l_pid = getpid();
-
-    char buffer[256] = {'5', '6'};
-
-    fcntl(fd, F_SETLKW, &lock);
-
-    //size_t len = 0;
-    ssize_t size = read(fd, buffer, 256);
-    // 1 indicates data is not updated
-    // then we return -2 
-    if(size < 0)
-	std::cout << "size < 0, thus it failed" << std::endl;
-    if(0){
-
-    }*/
-    if(1){
-	ifstream infile("data",ios::in);
-	string data;
-	for(int i = 0;;i++){
-	string rubbish;
-	if(!infile){
-		gadia_counter = 0;
-		infile.close();
-		printf ("file open failed!\n the counter is: %d", gadia_counter);
-		return -1;
-	}
-	getline(infile, rubbish);
-
-	if(infile.eof()){
-                if(isEOF){
-                	std::cout << "EOF" << std::endl;
-                	//close(fd);
-                	//lock.l_type = F_UNLCK;
-                	//fcntl(fd, F_SETLKW, &lock);
-                	// to declare end here is
-			infile.close();
-        		return uint64_t(-1);
-		}else{
-			data = rubbish;
-        	        int a = atoi(data.c_str());
-        	        gadia_counter++;
-        	        infile.close();
-			isEOF = true;
-	                return a;
-		
-		}
+        if(int(srcCore) == b || (-1 == b && a != (int)srcCore)){
+	    gadia_last_position = file.tellg();
+            file.close();
+            return c;
 
         }
 
-
-	if(i == gadia_counter){
-		isEOF = false;
-		data = rubbish;
-		int a = atoi(data.c_str());
-		gadia_counter++;
-		infile.close();
-		return a;
-	}
-
-
-	}
-
-	infile.close();
-        
     }
-    
+
+    return (uint64_t)-1;
+
+
+
 }
 
 void
